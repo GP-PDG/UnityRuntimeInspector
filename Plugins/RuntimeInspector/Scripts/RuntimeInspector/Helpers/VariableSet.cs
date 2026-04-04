@@ -12,11 +12,13 @@ namespace RuntimeInspectorNamespace
 
 		[SerializeField]
 		private string m_type;
-		public Type type;
+        [NonSerialized]
+        public Type type;
 
 		[SerializeField]
 		private string[] m_variables;
-		public HashSet<string> variables = null;
+        [NonSerialized]
+        public HashSet<string> variables;
 
 		public bool Init()
 		{
