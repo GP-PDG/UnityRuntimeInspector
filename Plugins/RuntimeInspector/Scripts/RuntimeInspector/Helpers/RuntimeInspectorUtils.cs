@@ -731,6 +731,17 @@ namespace RuntimeInspectorNamespace
 			return result;
 		}
 
+        public static IReadOnlyList<Assembly> GetAllAssemblies()
+        {
+#if UNITY_6000_4_OR_NEWER
+            return UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies();
+#elif UNITY_EDITOR || !NETFX_CORE
+            return AppDomain.CurrentDomain.GetAssemblies();
+#else
+            return null;
+#endif
+        }
+
 		private static bool IsSerializable( this Type type )
 		{
 #if UNITY_EDITOR || !NETFX_CORE
@@ -836,27 +847,30 @@ namespace RuntimeInspectorNamespace
 				if( type != null )
 					return type;
 
-#if UNITY_EDITOR || !NETFX_CORE
-				// Search all assemblies for type
+                // Search all assemblies for type
                 Type nameMatchingType = null;
-				foreach( Assembly assembly in AppDomain.CurrentDomain.GetAssemblies() )
-				{
-					try
-					{
-						foreach( Type t in assembly.GetTypes() )
-						{
+                foreach (Assembly assembly in GetAllAssemblies() ?? Array.Empty<Assembly>())
+                {
+#if (NET_4_6 || NET_STANDARD_2_0) && (UNITY_EDITOR || !NETFX_CORE)
+                    if (assembly.IsDynamic)
+                        continue;
+#endif
+
+                    try
+                    {
+                        foreach (Type t in assembly.GetTypes())
+                        {
                             if (t.FullName == typeName)
                                 return t;
                             else if (nameMatchingType == null && t.Name == typeName)
                                 nameMatchingType = t;
-						}
-					}
-					catch { }
-				}
+                        }
+                    }
+                    catch { }
+                }
 
                 if (nameMatchingType != null)
                     return nameMatchingType;
-#endif
 			}
 			catch { }
 
@@ -937,7 +951,6 @@ namespace RuntimeInspectorNamespace
 			{
 				customEditors = new Dictionary<Type, Type>( 89 );
 
-#if UNITY_EDITOR || !NETFX_CORE
 				// Search all assemblies for RuntimeInspectorCustomEditor attributes
 				// Don't search built-in assemblies for custom editors since they can't have any
 				string[] ignoredAssemblies = new string[]
@@ -963,41 +976,40 @@ namespace RuntimeInspectorNamespace
 #endif
 				};
 
-				foreach( Assembly assembly in AppDomain.CurrentDomain.GetAssemblies() )
-				{
-#if NET_4_6 || NET_STANDARD_2_0
-					if( assembly.IsDynamic )
-						continue;
+                foreach (Assembly assembly in GetAllAssemblies() ?? Array.Empty<Assembly>())
+                {
+#if (NET_4_6 || NET_STANDARD_2_0) && (UNITY_EDITOR || !NETFX_CORE)
+                    if (assembly.IsDynamic)
+                        continue;
 #endif
 
-					string assemblyName = assembly.GetName().Name;
-					bool ignoreAssembly = false;
-					for( int i = 0; i < ignoredAssemblies.Length; i++ )
-					{
-						if( caseInsensitiveComparer.IsPrefix( assemblyName, ignoredAssemblies[i], CompareOptions.IgnoreCase ) )
-						{
-							ignoreAssembly = true;
-							break;
-						}
-					}
+                    string assemblyName = assembly.GetName().Name;
+                    bool ignoreAssembly = false;
+                    for (int i = 0; i < ignoredAssemblies.Length; i++)
+                    {
+                        if (caseInsensitiveComparer.IsPrefix(assemblyName, ignoredAssemblies[i], CompareOptions.IgnoreCase))
+                        {
+                            ignoreAssembly = true;
+                            break;
+                        }
+                    }
 
-					if( ignoreAssembly )
-						continue;
+                    if (ignoreAssembly)
+                        continue;
 
-					try
-					{
-						foreach( Type _type in assembly.GetExportedTypes() )
-							AddCustomEditorInternal( _type, false );
-					}
-					catch( NotSupportedException ) { }
-					catch( System.IO.FileNotFoundException ) { }
-					catch( ReflectionTypeLoadException ) { }
-					catch( Exception e )
-					{
-						Debug.LogError( "Couldn't search assembly for RuntimeInspectorCustomEditor attributes: " + assembly.GetName().Name + "\n" + e.ToString() );
-					}
-				}
-#endif
+                    try
+                    {
+                        foreach (Type _type in assembly.GetExportedTypes())
+                            AddCustomEditorInternal(_type, false);
+                    }
+                    catch (NotSupportedException) { }
+                    catch (System.IO.FileNotFoundException) { }
+                    catch (ReflectionTypeLoadException) { }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Couldn't search assembly for RuntimeInspectorCustomEditor attributes: " + assembly.GetName().Name + "\n" + e.ToString());
+                    }
+                }
 			}
 
 			Type customEditorType;
