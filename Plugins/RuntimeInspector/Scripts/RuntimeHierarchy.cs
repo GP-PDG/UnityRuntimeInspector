@@ -20,7 +20,6 @@ namespace RuntimeInspectorNamespace
 		public delegate void DoubleClickDelegate( HierarchyData clickedItem );
 		public delegate bool GameObjectFilterDelegate( Transform transform );
 
-#pragma warning disable 0649
 		[SerializeField]
 		private float m_refreshInterval = 0f;
 		public float RefreshInterval
@@ -363,7 +362,6 @@ namespace RuntimeInspectorNamespace
 		[SerializeField]
 		private Sprite m_transformDrawerBackground;
 		internal Sprite TransformDrawerBackground { get { return m_transformDrawerBackground; } }
-#pragma warning restore 0649
 
 		private static int aliveHierarchies = 0;
 

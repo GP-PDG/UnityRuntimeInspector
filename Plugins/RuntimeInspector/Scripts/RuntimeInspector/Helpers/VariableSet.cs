@@ -10,7 +10,6 @@ namespace RuntimeInspectorNamespace
 	{
 		private const string INCLUDE_ALL_VARIABLES = "*";
 
-#pragma warning disable 0649
 		[SerializeField]
 		private string m_type;
 		public Type type;
@@ -18,7 +17,6 @@ namespace RuntimeInspectorNamespace
 		[SerializeField]
 		private string[] m_variables;
 		public HashSet<string> variables = null;
-#pragma warning restore 0649
 
 		public bool Init()
 		{

@@ -40,11 +40,9 @@ namespace RuntimeInspectorNamespace
 			typeof( List<Vector4> ), typeof( List<Vector3> ), typeof( List<Vector2> ), typeof( List<Rect> ),
 			typeof( List<Quaternion> ), typeof( List<Color> ), typeof( List<Color32> ), typeof( List<LayerMask> ), typeof( List<Bounds> ),
 			typeof( List<Matrix4x4> ), typeof( List<AnimationCurve> ), typeof( List<Gradient> ), typeof( List<RectOffset> ), typeof( List<GUIStyle> ),
-#if UNITY_2017_2_OR_NEWER
 			typeof( Vector3Int ), typeof( Vector2Int ), typeof( RectInt ), typeof( BoundsInt ),
 			typeof( Vector3Int[] ), typeof( Vector2Int[] ), typeof( RectInt[] ), typeof( BoundsInt[] ),
 			typeof( List<Vector3Int> ), typeof( List<Vector2Int> ), typeof( List<RectInt> ), typeof( List<BoundsInt> )
-#endif
 		};
 
 		private static readonly List<MemberInfo> validVariablesList = new List<MemberInfo>( 32 );
@@ -419,12 +417,7 @@ namespace RuntimeInspectorNamespace
 						position = referenceCanvasTransform.TransformPoint( centerOffset );
 					}
 
-#if UNITY_5_6_OR_NEWER
 					canvas.transform.SetPositionAndRotation( position, referenceCanvasTransform.rotation );
-#else
-					canvas.transform.position = position;
-					canvas.transform.rotation = referenceCanvasTransform.rotation;
-#endif
 					canvas.transform.localScale = referenceCanvasTransform.localScale;
 					break;
 			}
