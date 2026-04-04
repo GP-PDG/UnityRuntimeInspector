@@ -838,18 +838,24 @@ namespace RuntimeInspectorNamespace
 
 #if UNITY_EDITOR || !NETFX_CORE
 				// Search all assemblies for type
+                Type nameMatchingType = null;
 				foreach( Assembly assembly in AppDomain.CurrentDomain.GetAssemblies() )
 				{
 					try
 					{
 						foreach( Type t in assembly.GetTypes() )
 						{
-							if( t.Name == typeName || t.FullName == typeName )
-								return t;
+                            if (t.FullName == typeName)
+                                return t;
+                            else if (nameMatchingType == null && t.Name == typeName)
+                                nameMatchingType = t;
 						}
 					}
 					catch { }
 				}
+
+                if (nameMatchingType != null)
+                    return nameMatchingType;
 #endif
 			}
 			catch { }
